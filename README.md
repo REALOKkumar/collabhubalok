@@ -1,31 +1,70 @@
-**Collab-Hub – Study Group Finder**<br><br>
+# Getting Started with Create React App
 
-**Project Overview**<br>
-Collab-Hub is a web-based platform developed to help college students connect with peers for studying, project work, and hackathon collaboration. It provides a structured and efficient way to find partners based on skills and interests.<br><br>
+This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
-**Problem Statement**<br>
-Students often face difficulty in finding suitable peers to study specific subjects or form teams for academic and technical events. Existing communication methods are unorganized and inefficient.<br><br>
+## Available Scripts
 
-**Proposed Solution**<br>
-Collab-Hub offers a centralized system where students can create study or collaboration requests and join others with similar academic goals through a simple and secure interface.<br><br>
+In the project directory, you can run:
 
-**Key Features**<br>
-• User registration and profile management<br>
-• Posting and browsing study requests<br>
-• One-click join system<br>
-• Search and filter based on skills and interests<br>
-• Notifications for request updates<br><br>
+### `npm start`
 
-**Team Structure**<br>
+Runs the app in the development mode.\
+Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
 
-## Team Responsibilities
+The page will reload when you make changes.\
+You may also see any lint errors in the console.
 
-| Members        | Primary Responsibility           | Key Tasks |
-|---------------|----------------------------------|----------|
-| **Sandipan Ray** | The Architect (Auth & Setup) | • Set up GitHub Repo & Firebase Project<br>• Build Login & Signup Pages<br>• Handle Google/Email Authentication logic |
-| **Alok Kumar** | The Builder (Dashboard) | • Create the Main Layout (Navbar, Sidebar)<br>• Build the "Feed" component that lists all study requests<br>• Design the "Card" component (how a request looks) |
-| **Harshit Raj** | The Creator (Forms & Actions) | • Build the "Create Post" Modal/Page<br>• Handle the logic to send data to the database<br>• Build the "Join" button logic (updating the DB when clicked) |
-| **Roshan Oraon** | The Polisher (Profile & Search) | • Build the User Profile Page (Display Name, Skills)<br>• Build the Search Bar & Filter logic (e.g., filter by "React" or "Math")<br>• Global CSS/Styling (fonts, colors, UI consistency) |
+### `npm test`
 
-**Conclusion**<br>
-Collab-Hub simplifies peer collaboration by providing a reliable and organized platform for students to connect, study, and grow together.
+Launches the test runner in the interactive watch mode.\
+See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+
+### `npm run build`
+
+Builds the app for production to the `build` folder.\
+It correctly bundles React in production mode and optimizes the build for the best performance.
+
+The build is minified and the filenames include the hashes.\
+Your app is ready to be deployed!
+
+See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+
+### `npm run eject`
+
+**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+
+If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+
+Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+
+You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+
+## Learn More
+
+You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+
+To learn React, check out the [React documentation](https://reactjs.org/).
+
+### Code Splitting
+
+This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+
+### Analyzing the Bundle Size
+
+This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+
+### Making a Progressive Web App
+
+This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+
+### Advanced Configuration
+
+This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+
+### Deployment
+
+This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+
+### `npm run build` fails to minify
+
+This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
