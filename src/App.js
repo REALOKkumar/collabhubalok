@@ -1,7 +1,8 @@
 import React from "react";
 import { Routes, Route } from "react-router-dom";
 import AuthForm from "./components/AuthForm";
-import Dashboard from "./components/Dashboard"; // the dashboard component we created
+import Dashboard from "./components/Dashboard";
+import PrivateRoute from "./components/PrivateRoute";
 import "./App.css";
 import Home from "./components/Home";
 import Profile from "./components/Profile";
@@ -18,7 +19,15 @@ function App() {
     <div className="App">
       <Routes>
         <Route path="/" element={<AuthForm />} />
-        <Route path="/Dashboard" element={<Dashboard />} />
+
+        <Route
+          path="/Dashboard"
+          element={
+            <PrivateRoute>
+              <Dashboard />
+            </PrivateRoute>
+          }
+        />
 
 
         <Route path="/Home" element={<Home />} />
