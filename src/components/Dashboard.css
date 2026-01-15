@@ -1,0 +1,105 @@
+/* Shared base styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Segoe UI", sans-serif;
+}
+
+body {
+  background-color: #ffffff;
+  color: #111;
+}
+
+/* NAVBAR */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px 40px;
+  border-bottom: 1px solid #eee;
+}
+
+.logo {
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.nav-links {
+  display: flex;
+  gap: 25px;
+  align-items: center;
+}
+
+.nav-item {
+  text-decoration: none;
+  font-weight: 500;
+  color: #333;
+  display: flex;
+  gap: 6px;
+}
+
+.nav-item.active {
+  background: #0b0b1d;
+  color: #fff;
+  padding: 8px 14px;
+  border-radius: 10px;
+}
+
+/* MAIN */
+.container {
+  padding: 40px;
+}
+
+h1 {
+  font-size: 28px;
+  margin-bottom: 10px;
+}
+
+.subtitle {
+  color: #666;
+  margin-bottom: 30px;
+}
+
+/* STATS */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 25px;
+  margin-top: 20px;
+}
+
+.stat-card {
+  border: 1px solid #e5e5e5;
+  border-radius: 16px;
+  padding: 25px;
+  background: #fff;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.03);
+  text-align: center;
+}
+
+.stat-card h2 {
+  font-size: 32px;
+  margin-bottom: 8px;
+}
+
+.stat-card p {
+  color: #666;
+  font-size: 15px;
+}
+
+/* RECENT */
+.recent {
+  margin-top: 50px;
+}
+
+.recent h2 {
+  margin-bottom: 15px;
+}
+
+.recent-item {
+  padding: 15px;
+  border-bottom: 1px solid #eee;
+  font-size: 15px;
+  color: #444;
+}
