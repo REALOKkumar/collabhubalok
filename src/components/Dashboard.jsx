@@ -55,7 +55,7 @@ const Dashboard = () => {
           <a className="nav-item" href="/Home">🏠 Home</a>
           <a className="nav-item active" href="/dashboard">📊 Dashboard</a>
           <a className="nav-item" href="/profile">👤 Profile</a>
-          <a className="nav-item" href="/create">➕ Create Request</a>
+          <a className="nav-item" href="/CreateRequest">➕ Create Request</a>
         </div>
       </div>
 

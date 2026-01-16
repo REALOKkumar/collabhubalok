@@ -7,7 +7,7 @@
 }
 
 body {
-  background-color: #ffffff;
+  background-color: rgb(255, 255, 255);
   color: #111;
 }
 
@@ -17,7 +17,9 @@ body {
   justify-content: space-between;
   align-items: center;
   padding: 18px 40px;
+ 
   border-bottom: 1px solid #eee;
+  color: #eee;
 }
 
 .logo {
@@ -49,6 +51,9 @@ body {
 /* MAIN */
 .container {
   padding: 40px;
+  max-width: 1200px; 
+  /* margin: 0 auto;    Ye poore box ko screen ke beech mein rakhega */
+  width: 95%;        /* Choti screens par ye 95% width lega */
 }
 
 h1 {

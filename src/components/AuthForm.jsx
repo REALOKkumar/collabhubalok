@@ -164,7 +164,7 @@ const AuthForm = () => {
   };
 
   return (
-    <div className="container">
+    <div className="login-container">
       {/* Tabs */}
       <div className="tab-header">
         <div
