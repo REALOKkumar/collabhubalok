@@ -35,9 +35,9 @@ const AuthForm = () => {
   // ---------------- AUTH PERSISTENCE ----------------
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user && user.emailVerified) {
-        navigate("/dashboard");
-      }
+      if (user && (user.emailVerified || user.providerData[0].providerId !== "password")) {
+  navigate("/dashboard");
+}
     });
     return () => unsubscribe();
   }, [navigate]);
@@ -75,6 +75,7 @@ const AuthForm = () => {
 
       if (!res.user.emailVerified) {
         setError("Please verify your email before logging in.");
+        setLoading(false);
         return;
       }
 
@@ -164,7 +165,7 @@ const AuthForm = () => {
   };
 
   return (
-    <div className="login-container">
+    <div className="container">
       {/* Tabs */}
       <div className="tab-header">
         <div
