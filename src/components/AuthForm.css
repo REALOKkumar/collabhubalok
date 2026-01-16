@@ -116,3 +116,38 @@ p {
   font-size: 14px;
   text-align: center;
 }
+/* Validation messages */
+.error-text {
+  color: #e63946;
+  font-size: 12px;
+  margin-top: -8px;
+  margin-bottom: 10px;
+  text-align: left;
+}
+
+/* Password strength */
+.strength {
+  font-size: 12px;
+  margin-top: -8px;
+  margin-bottom: 10px;
+  text-align: left;
+  font-weight: 600;
+}
+
+.strength.weak {
+  color: #e63946;
+}
+
+.strength.medium {
+  color: #f4a261;
+}
+
+.strength.strong {
+  color: #2a9d8f;
+}
+
+/* Disabled signup button */
+.form-container button:disabled {
+  background: #9bbbd4;
+  cursor: not-allowed;
+}
