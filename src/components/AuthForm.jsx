@@ -338,27 +338,14 @@ const AuthForm = () => {
   const githubProvider = new GithubAuthProvider();
 
   // ---------------- AUTH PERSISTENCE ----------------
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-<<<<<<< HEAD
-      if (user && user.emailVerified) {
-        // UPDATE: Agar user pehle se logged in hai, toh uska data refresh hone par bhi save rakhein
-        const userData = {
-          name: user.displayName || "User",
-          email: user.email,
-          photo: user.photoURL
-        };
-        localStorage.setItem("userLoggedIn", JSON.stringify(userData));
-        navigate("/dashboard");
-      }
-=======
-      if (user && (user.emailVerified || user.providerData[0].providerId !== "password")) {
-  navigate("/dashboard");
-}
->>>>>>> fa5378d2e0d9774acf34f0b5eef72c25191dab41
-    });
-    return () => unsubscribe();
-  }, [navigate]);
+//   useEffect(() => {
+//     const unsubscribe = onAuthStateChanged(auth, (user) => {
+//       if (user && (user.emailVerified || user.providerData[0].providerId !== "password")) {
+//   navigate("/dashboard");
+// }
+//     });
+//     return () => unsubscribe();
+//   }, [navigate]);
 
   // ---------------- ERROR MAPPING ----------------
   const getErrorMessage = (code) => {
