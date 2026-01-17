@@ -11,65 +11,75 @@ const Dashboard = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filter, setFilter] = useState("All");
   const [loading, setLoading] = useState(true);
+
   const navigate = useNavigate();
 
-  // 1. Auth check aur Real-time data fetching
+  // 🔹 1. Auth check + backend dashboard fetch
   useEffect(() => {
-  const fetchDashboard = async () => {
-    const token = await auth.currentUser.getIdToken();
+    const fetchDashboard = async () => {
+      if (!auth.currentUser) return;
 
-    const res = await fetch("http://localhost:5000/api/user/dashboard", {
-      headers: {
-        Authorization: `Bearer ${token}`
+      setUserName(auth.currentUser.displayName || "Student");
+
+      try {
+        const token = await auth.currentUser.getIdToken();
+
+        const res = await fetch("http://localhost:5000/api/user/dashboard", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        const data = await res.json();
+        console.log("Backend data:", data);
+      } catch (err) {
+        console.error("Dashboard fetch error:", err);
       }
-    });
+    };
 
-    const data = await res.json();
-    console.log("Backend data:", data);
-  };
-
-  fetchDashboard();
+    fetchDashboard();
   }, []);
 
-
-  const fetchPosts = async () => {
+  // 🔹 2. Real-time Firestore posts listener
+  useEffect(() => {
     const q = query(collection(db, "posts"), orderBy("timestamp", "desc"));
+
     const unsubscribePosts = onSnapshot(q, (snapshot) => {
-      const postsArray = snapshot.docs.map(doc => ({
+      const postsArray = snapshot.docs.map((doc) => ({
         id: doc.id,
-        ...doc.data()
+        ...doc.data(),
       }));
       setPosts(postsArray);
       setLoading(false);
     });
 
-    return () => {
-      unsubscribeAuth();
-      unsubscribePosts();
-    };
-  }, [navigate]);
+    return () => unsubscribePosts();
+  }, []);
 
+  // 🔹 3. Logout handler
   const handleLogout = async () => {
     await signOut(auth);
     localStorage.removeItem("userLoggedIn");
     navigate("/");
   };
 
-  // 2. Search aur Filter logic
-  const filteredPosts = posts.filter(post => 
-    (post.content?.toLowerCase().includes(searchTerm.toLowerCase()) || 
-     post.subject?.toLowerCase().includes(searchTerm.toLowerCase())) &&
-    (filter === "All" || post.category === filter)
+  // 🔹 4. Search & filter logic
+  const filteredPosts = posts.filter(
+    (post) =>
+      (post.content?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        post.subject?.toLowerCase().includes(searchTerm.toLowerCase())) &&
+      (filter === "All" || post.category === filter)
   );
 
-  // 3. Simple analytics calculation
-  const myRequestsCount = posts.filter(p => p.uid === auth.currentUser?.uid).length;
+  // 🔹 5. Simple analytics
+  const myRequestsCount = posts.filter(
+    (p) => p.uid === auth.currentUser?.uid
+  ).length;
 
   return (
     <div className="dashboard-container">
       <div className="dashboard-layout">
-        
-        {/* LEFT SIDEBAR: Stats & Filters */}
+        {/* LEFT SIDEBAR */}
         <aside className="dashboard-sidebar">
           <div className="user-welcome">
             <h2>Welcome, {userName}! 👋</h2>
@@ -88,16 +98,22 @@ const Dashboard = () => {
           </div>
 
           <div className="quick-links">
-            <button onClick={() => navigate("/CreateRequest")} className="create-btn-side">
+            <button
+              onClick={() => navigate("/CreateRequest")}
+              className="create-btn-side"
+            >
               + New Request
+            </button>
+
+            <button onClick={handleLogout} className="logout-btn">
+              Logout
             </button>
           </div>
         </aside>
 
-        {/* CENTER: Analytics & Feed */}
+        {/* MAIN FEED */}
         <main className="main-feed">
-          
-          {/* --- ANALYTICS SECTION --- */}
+          {/* ANALYTICS */}
           <div className="analytics-grid">
             <div className="analytics-card">
               <div className="analytics-icon">🔥</div>
@@ -132,17 +148,17 @@ const Dashboard = () => {
             </div>
           </div>
 
-          {/* SEARCH BAR */}
+          {/* SEARCH */}
           <div className="search-box">
-            <input 
-              type="text" 
-              placeholder="🔍 Search subjects, topics or partners..." 
+            <input
+              type="text"
+              placeholder="🔍 Search subjects, topics or partners..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
 
-          {/* STUDY REQUESTS LIST */}
+          {/* FEED */}
           <div className="feed">
             <div className="feed-header">
               <h3>Live Study Requests</h3>
@@ -155,31 +171,51 @@ const Dashboard = () => {
               filteredPosts.map((post) => (
                 <div key={post.id} className="study-card">
                   <div className="card-header">
-                    <span className="badge">{post.category || "General"}</span>
-                    <span className="time">{post.timestamp?.toDate().toLocaleDateString()}</span>
+                    <span className="badge">
+                      {post.category || "General"}
+                    </span>
+                    <span className="time">
+                      {post.timestamp?.toDate().toLocaleDateString()}
+                    </span>
                   </div>
+
                   <div className="card-body">
-                    <h4>{post.subject}: {post.topic}</h4>
-                    <p className="poster-info">By <strong>{post.name}</strong></p>
+                    <h4>
+                      {post.subject}: {post.topic}
+                    </h4>
+                    <p className="poster-info">
+                      By <strong>{post.name}</strong>
+                    </p>
                     <p className="post-content">{post.content}</p>
-                    {post.deadline && <p className="deadline">🗓 Target Date: {post.deadline}</p>}
+                    {post.deadline && (
+                      <p className="deadline">
+                        🗓 Target Date: {post.deadline}
+                      </p>
+                    )}
                   </div>
+
                   <div className="card-footer">
-                    <div className="team-size">👥 Needed: {post.teamSize || 2} Partners</div>
-                    <button className="join-btn">Interested (Join)</button>
+                    <div className="team-size">
+                      👥 Needed: {post.teamSize || 2} Partners
+                    </div>
+                    <button className="join-btn">
+                      Interested (Join)
+                    </button>
                   </div>
                 </div>
               ))
             ) : (
               <div className="empty-feed">
                 <p>No study requests found. Be the first to post!</p>
-                <button onClick={() => navigate("/CreateRequest")}>Create a Request</button>
+                <button onClick={() => navigate("/CreateRequest")}>
+                  Create a Request
+                </button>
               </div>
             )}
           </div>
         </main>
 
-        {/* RIGHT SIDEBAR: Trending & Activity */}
+        {/* RIGHT SIDEBAR */}
         <aside className="trending-sidebar">
           <div className="trending-box">
             <h4>🔥 Trending Topics</h4>
