@@ -318,8 +318,30 @@ import {
 } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 import "./AuthForm.css";
+import name from './images/logo.png';
 
 const AuthForm = () => {
+  // ... inside AuthForm component ...
+
+  // HELPER: Syncs Firebase User with MongoDB
+  const syncWithBackend = async (user) => {
+    try {
+      await fetch("http://localhost:5000/api/auth/sync", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          firebaseUid: user.uid,
+          email: user.email,
+          name: user.displayName || user.email.split('@')[0] // Fallback name
+        }),
+      });
+    } catch (error) {
+      console.error("Backend Sync Failed:", error);
+    }
+  };
+
+// ... keep reading below for where to put this ...
+
   const [activeTab, setActiveTab] = useState("login");
   const navigate = useNavigate();
 
@@ -383,26 +405,15 @@ const AuthForm = () => {
     setLoading(true);
 
     try {
-      const res = await signInWithEmailAndPassword(
-        auth,
-        loginEmail,
-        loginPassword
-      );
-
-      if (!res.user.emailVerified) {
-        setError("Please verify your email before logging in.");
-        setLoading(false);
-        return;
-      }
-
-      // UPDATE: Login hote hi user ki details save kar li
-      saveUserLocally(res.user);
-      navigate("/dashboard");
+      await signInWithEmailAndPassword(auth, loginEmail, loginPassword);
+      navigate("/Home");
     } catch (err) {
       setError(getErrorMessage(err.code));
     } finally {
       setLoading(false);
     }
+
+    setLoading(false);
   };
 
   // ---------------- SIGNUP ----------------
@@ -429,10 +440,7 @@ const AuthForm = () => {
         displayName: signupName,
       });
 
-      await sendEmailVerification(userCredential.user);
-
-      setError("Verification email sent. Please check your inbox.");
-      setActiveTab("login");
+      navigate("/Home");
     } catch (err) {
       setError(getErrorMessage(err.code));
     } finally {
@@ -460,9 +468,8 @@ const AuthForm = () => {
     setError("");
     setLoading(true);
     try {
-      const res = await signInWithPopup(auth, googleProvider);
-      // UPDATE: Google login ke baad data save kiya
-      saveUserLocally(res.user);
+      const result = await signInWithPopup(auth, googleProvider);
+      await syncWithBackend(result.user); // <--- ADDED THIS
       navigate("/dashboard");
     } catch (err) {
       setError(getErrorMessage(err.code));
@@ -476,9 +483,8 @@ const AuthForm = () => {
     setError("");
     setLoading(true);
     try {
-      const res = await signInWithPopup(auth, githubProvider);
-      // UPDATE: GitHub login ke baad data save kiya
-      saveUserLocally(res.user);
+      const result = await signInWithPopup(auth, githubProvider);
+      await syncWithBackend(result.user); // <--- ADDED THIS
       navigate("/dashboard");
     } catch (err) {
       setError(getErrorMessage(err.code));
@@ -487,8 +493,9 @@ const AuthForm = () => {
     }
   };
 
-  return (
-    <div className="container">
+  return ( 
+<><img class="logo" src={name} alt="CollabHub" height="230" width="500" /><div className="container">
+    
       {/* Tabs */}
       <div className="tab-header">
         <div
@@ -513,16 +520,14 @@ const AuthForm = () => {
             placeholder="Email"
             value={loginEmail}
             onChange={(e) => setLoginEmail(e.target.value)}
-            required
-          />
+            required />
 
           <input
             type="password"
             placeholder="Password"
             value={loginPassword}
             onChange={(e) => setLoginPassword(e.target.value)}
-            required
-          />
+            required />
 
           <button type="submit" disabled={loading}>
             <i className="fa-solid fa-envelope"></i>&nbsp;
@@ -552,32 +557,28 @@ const AuthForm = () => {
             placeholder="Full Name"
             value={signupName}
             onChange={(e) => setSignupName(e.target.value)}
-            required
-          />
+            required />
 
           <input
             type="email"
             placeholder="Email"
             value={signupEmail}
             onChange={(e) => setSignupEmail(e.target.value)}
-            required
-          />
+            required />
 
           <input
             type="password"
             placeholder="Password"
             value={signupPassword}
             onChange={(e) => setSignupPassword(e.target.value)}
-            required
-          />
+            required />
 
           <input
             type="password"
             placeholder="Confirm Password"
             value={signupConfirmPassword}
             onChange={(e) => setSignupConfirmPassword(e.target.value)}
-            required
-          />
+            required />
 
           <button type="submit" disabled={loading}>
             <i className="fa-solid fa-user-plus"></i>&nbsp;
@@ -595,8 +596,9 @@ const AuthForm = () => {
         </form>
       )}
 
-      {error && <p className="error">{error}</p>}
-    </div>
+      {/* Error */}
+      {error && <p style={{ color: "red", marginTop: "10px" }}>{error}</p>}
+    </div></>
   );
 };
 

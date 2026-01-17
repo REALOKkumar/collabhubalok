@@ -1,13 +1,42 @@
 // src/components/CreatePost.js
 import React, { useState } from 'react';
+import { auth } from '../firebase'; // Import auth to get current user
 
 function CreatePost() {
   const [title, setTitle] = useState('');
   const [desc, setDesc] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {    //Make async
     e.preventDefault();
-    alert(`Form submitted: ${title}`); // Just for testing today
+    
+    const user = auth.currentUser;
+    if(!user) {
+      alert("You must be logged in to post!");
+      return;
+    }
+    try {
+      const response = await fetch('http://localhost:5000/api/posts/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          title,
+          desc,
+          firebaseUid: user.uid // Send the ID to link with Backend
+        }),
+      });
+
+      if (response.ok) {
+        alert('Post created successfully!');
+        setTitle('');
+        setDesc('');
+      } else {
+        alert('Failed to save post to database.');
+      }
+    } catch (error) {
+      console.error("Error creating post:", error);
+    }
   };
 
   return (

@@ -9,22 +9,20 @@
 /* Page center */
 body {
   min-height: 100vh;
-  background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+  backdrop-filter: blur(5px);
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 /* Auth Card */
-.login-container {
-  
-   
-  width: 360px;
-  margin: 50px auto; /* 50px gap top se, auto side se center kar dega */
-  background: #ffffff;
+.container {
+  margin-top:10%;
+  width: 100%;
   padding: 32px;
-  border-radius: 14px;
-  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.25);
+  border: 3px solid rgb(255, 255, 255);
+  border-radius: 25px;
+  box-shadow: 0px 0px 20px rgba(0, 0, 0, 50);
   animation: fadeIn 0.6s ease-in-out;
   
 }
@@ -94,7 +92,7 @@ body {
 /* Button */
 .form-container button {
   padding: 12px;
-  margin-top: 8px;
+  margin: 10px;
   border: none;
   background: #0b0b1d;
   color: white;

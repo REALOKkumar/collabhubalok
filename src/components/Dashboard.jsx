@@ -15,15 +15,24 @@ const Dashboard = () => {
 
   // 1. Auth check aur Real-time data fetching
   useEffect(() => {
-    const unsubscribeAuth = auth.onAuthStateChanged((user) => {
-      if (user) {
-        setUserName(user.displayName || user.email.split('@')[0]);
-      } else {
-        navigate("/");
+  const fetchDashboard = async () => {
+    const token = await auth.currentUser.getIdToken();
+
+    const res = await fetch("http://localhost:5000/api/user/dashboard", {
+      headers: {
+        Authorization: `Bearer ${token}`
       }
     });
 
-    // Real-time Posts Fetching
+    const data = await res.json();
+    console.log("Backend data:", data);
+  };
+
+  fetchDashboard();
+  }, []);
+
+
+  const fetchPosts = async () => {
     const q = query(collection(db, "posts"), orderBy("timestamp", "desc"));
     const unsubscribePosts = onSnapshot(q, (snapshot) => {
       const postsArray = snapshot.docs.map(doc => ({
