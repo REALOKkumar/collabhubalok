@@ -1,19 +1,25 @@
 import React, { useEffect, useState } from "react";
 import { auth, db } from "../firebase";
-import { collection, query, orderBy, onSnapshot } from "firebase/firestore";
+import { collection, query, orderBy, onSnapshot, updateDoc, doc } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
-import { signOut } from "firebase/auth";
 import "./Dashboard.css";
 
 const Dashboard = () => {
   const [userName, setUserName] = useState("");
   const [posts, setPosts] = useState([]);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [filter, setFilter] = useState("All");
+  const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  // 1. Auth check aur Real-time data fetching
+  // Mock Rating Data (This could later come from Firestore)
+  const ratingData = [
+    { stars: 5, percentage: 85, color: "#0b0b1d" },
+    { stars: 4, percentage: 10, color: "#2d3748" },
+    { stars: 3, percentage: 3, color: "#4a5568" },
+    { stars: 2, percentage: 1, color: "#718096" },
+    { stars: 1, percentage: 1, color: "#a0aec0" },
+  ];
+
   useEffect(() => {
     const unsubscribeAuth = auth.onAuthStateChanged((user) => {
       if (user) {
@@ -23,171 +29,203 @@ const Dashboard = () => {
       }
     });
 
-    // Real-time Posts Fetching
-    const q = query(collection(db, "posts"), orderBy("timestamp", "desc"));
-    const unsubscribePosts = onSnapshot(q, (snapshot) => {
-      const postsArray = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }));
-      setPosts(postsArray);
+    const qPosts = query(collection(db, "posts"), orderBy("timestamp", "desc"));
+    const unsubscribePosts = onSnapshot(qPosts, (snapshot) => {
+      setPosts(snapshot.docs.map(d => ({ id: d.id, ...d.data() })));
       setLoading(false);
+    });
+
+    const qNotify = query(collection(db, "notifications"), orderBy("timestamp", "desc"));
+    const unsubscribeNotify = onSnapshot(qNotify, (snapshot) => {
+      setNotifications(snapshot.docs.map(d => ({ id: d.id, ...d.data() })));
     });
 
     return () => {
       unsubscribeAuth();
       unsubscribePosts();
+      unsubscribeNotify();
     };
   }, [navigate]);
 
-  const handleLogout = async () => {
-    await signOut(auth);
-    localStorage.removeItem("userLoggedIn");
-    navigate("/");
+  const handleRequestAction = async (notificationId, status) => {
+    try {
+      const notifyRef = doc(db, "notifications", notificationId);
+      await updateDoc(notifyRef, { status: status });
+      alert(`User ${status} successfully!`);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
-  // 2. Search aur Filter logic
-  const filteredPosts = posts.filter(post => 
-    (post.content?.toLowerCase().includes(searchTerm.toLowerCase()) || 
-     post.subject?.toLowerCase().includes(searchTerm.toLowerCase())) &&
-    (filter === "All" || post.category === filter)
-  );
-
-  // 3. Simple analytics calculation
-  const myRequestsCount = posts.filter(p => p.uid === auth.currentUser?.uid).length;
+  const myPosts = posts.filter(p => p.uid === auth.currentUser?.uid);
 
   return (
     <div className="dashboard-container">
-      <div className="dashboard-layout">
+      <div className="dashboard-wrapper">
         
-        {/* LEFT SIDEBAR: Stats & Filters */}
-        <aside className="dashboard-sidebar">
-          <div className="user-welcome">
-            <h2>Welcome, {userName}! 👋</h2>
-            <p>MNNIT Allahabad Student</p>
+        {/* --- LEFT SIDEBAR: PROFILE & SKILLS --- */}
+        <aside className="sidebar-left">
+          <div className="profile-card-static">
+            <div className="avatar-circle">{userName.charAt(0)}</div>
+            <h3>{userName}</h3>
+            <p className="university-tag">MNNIT Allahabad</p>
+            <div className="profile-stats-row">
+              <div><strong>12</strong><br/>Collabs</div>
+              <div><strong>4.9</strong><br/>Rating</div>
+            </div>
           </div>
 
-          <div className="filter-section">
-            <h4>Filter by Category</h4>
-            <select value={filter} onChange={(e) => setFilter(e.target.value)}>
-              <option value="All">All Categories</option>
-              <option value="Exam Prep">Exam Prep</option>
-              <option value="Project Team">Project Team</option>
-              <option value="Assignment">Assignment</option>
-              <option value="Daily Study">Daily Study</option>
-            </select>
+          <div className="skills-cloud-card">
+            <h4>Knowledge Network 🌐</h4>
+            <div className="cloud-tags">
+              <span className="cloud-tag active">React</span>
+              <span className="cloud-tag">Python</span>
+              <span className="cloud-tag">DSA</span>
+              <span className="cloud-tag">AI/ML</span>
+              <span className="cloud-tag">Figma</span>
+            </div>
           </div>
 
-          <div className="quick-links">
-            <button onClick={() => navigate("/CreateRequest")} className="create-btn-side">
-              + New Request
-            </button>
-          </div>
+          <button className="create-request-btn-large" onClick={() => navigate("/CreateRequest")}>
+            + Start New Session
+          </button>
         </aside>
 
-        {/* CENTER: Analytics & Feed */}
-        <main className="main-feed">
-          
-          {/* --- ANALYTICS SECTION --- */}
-          <div className="analytics-grid">
-            <div className="analytics-card">
-              <div className="analytics-icon">🔥</div>
-              <div className="analytics-info">
-                <h3>Active Streak</h3>
-                <p>3 Days</p>
+        {/* --- CENTER COLUMN: MAIN CONTENT --- */}
+        <main className="dashboard-main">
+          <header className="dash-header">
+            <h1>Student Command Center</h1>
+            <p>Track your progress and manage collaborations</p>
+          </header>
+
+          {/* Performance Analytics Widgets */}
+          <section className="analytics-section-grid">
+            <div className="stat-widget">
+              <div className="widget-icon fire">🔥</div>
+              <div className="widget-data">
+                <span>Active Streak</span>
+                <h4>5 Days</h4>
               </div>
             </div>
-
-            <div className="analytics-card">
-              <div className="analytics-icon">🤝</div>
-              <div className="analytics-info">
-                <h3>My Requests</h3>
-                <p>{myRequestsCount} Posts</p>
+            <div className="stat-widget">
+              <div className="widget-icon clock">⌛</div>
+              <div className="widget-data">
+                <span>Study Hours</span>
+                <h4>12.5 hrs</h4>
               </div>
             </div>
-
-            <div className="analytics-card">
-              <div className="analytics-icon">📚</div>
-              <div className="analytics-info">
-                <h3>Study Hours</h3>
-                <p>8.2 hrs</p>
+            <div className="stat-widget">
+              <div className="widget-icon check">✅</div>
+              <div className="widget-data">
+                <span>Completed</span>
+                <h4>8 Sessions</h4>
               </div>
             </div>
+          </section>
 
-            <div className="analytics-card">
-              <div className="analytics-icon">⭐</div>
-              <div className="analytics-info">
-                <h3>Reputation</h3>
-                <p>4.9/5.0</p>
-              </div>
+          {/* --- RATING BREAKDOWN GRAPH --- */}
+          <section className="rating-analytics-card">
+            <div className="rating-header">
+              <h3>Collaboration Rating</h3>
+              <div className="rating-score">4.9 <span>★</span></div>
             </div>
-          </div>
-
-          {/* SEARCH BAR */}
-          <div className="search-box">
-            <input 
-              type="text" 
-              placeholder="🔍 Search subjects, topics or partners..." 
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
-
-          {/* STUDY REQUESTS LIST */}
-          <div className="feed">
-            <div className="feed-header">
-              <h3>Live Study Requests</h3>
-              <span className="live-pulse"></span>
-            </div>
-
-            {loading ? (
-              <p>Loading requests...</p>
-            ) : filteredPosts.length > 0 ? (
-              filteredPosts.map((post) => (
-                <div key={post.id} className="study-card">
-                  <div className="card-header">
-                    <span className="badge">{post.category || "General"}</span>
-                    <span className="time">{post.timestamp?.toDate().toLocaleDateString()}</span>
+            <div className="rating-chart">
+              {ratingData.map((data) => (
+                <div key={data.stars} className="rating-row">
+                  <span className="star-num">{data.stars} ★</span>
+                  <div className="bar-container">
+                    <div 
+                      className="bar-fill" 
+                      style={{ 
+                        width: `${data.percentage}%`, 
+                        backgroundColor: data.color 
+                      }}
+                    ></div>
                   </div>
-                  <div className="card-body">
-                    <h4>{post.subject}: {post.topic}</h4>
-                    <p className="poster-info">By <strong>{post.name}</strong></p>
-                    <p className="post-content">{post.content}</p>
-                    {post.deadline && <p className="deadline">🗓 Target Date: {post.deadline}</p>}
+                  <span className="percent-text">{data.percentage}%</span>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          {/* Management Area */}
+          <section className="management-area">
+            <div className="section-title-row">
+              <h3>My Active Requests</h3>
+              <span className="count-pill">{myPosts.length}</span>
+            </div>
+
+            <div className="management-stack">
+              {myPosts.length > 0 ? myPosts.map(post => (
+                <div key={post.id} className="request-mgmt-card">
+                  <div className="mgmt-header">
+                    <div className="subject-info">
+                      <span className="cat-badge">{post.category || "General"}</span>
+                      <h4>{post.subject}: {post.topic}</h4>
+                    </div>
+                    <span className={`status-label ${post.status || 'open'}`}>
+                      ● {post.status || 'Open'}
+                    </span>
                   </div>
-                  <div className="card-footer">
-                    <div className="team-size">👥 Needed: {post.teamSize || 2} Partners</div>
-                    <button className="join-btn">Interested (Join)</button>
+
+                  <div className="applicants-tray">
+                    <h5>Pending Applications</h5>
+                    <div className="tray-scroll">
+                      {notifications.filter(n => n.postId === post.id && n.status === "pending").length > 0 ? (
+                        notifications.filter(n => n.postId === post.id && n.status === "pending").map(n => (
+                          <div key={n.id} className="applicant-row">
+                            <span className="applicant-name">👤 {n.senderName}</span>
+                            <div className="action-buttons">
+                              <button className="accept-tiny" onClick={() => handleRequestAction(n.id, "accepted")}>Accept</button>
+                              <button className="decline-tiny" onClick={() => handleRequestAction(n.id, "declined")}>Decline</button>
+                            </div>
+                          </div>
+                        ))
+                      ) : (
+                        <p className="no-app-text">No pending applicants yet.</p>
+                      )}
+                    </div>
                   </div>
                 </div>
-              ))
-            ) : (
-              <div className="empty-feed">
-                <p>No study requests found. Be the first to post!</p>
-                <button onClick={() => navigate("/CreateRequest")}>Create a Request</button>
-              </div>
-            )}
-          </div>
+              )) : (
+                <div className="empty-state">You haven't posted any requests yet.</div>
+              )}
+            </div>
+          </section>
         </main>
 
-        {/* RIGHT SIDEBAR: Trending & Activity */}
-        <aside className="trending-sidebar">
-          <div className="trending-box">
-            <h4>🔥 Trending Topics</h4>
-            <ul className="trending-list">
-              <li>#DSA_Recursion</li>
-              <li>#MNNIT_MCA_Exams</li>
-              <li>#WebDev_React_Project</li>
-              <li>#DBMS_SQL_Practice</li>
-            </ul>
+        {/* --- RIGHT SIDEBAR: AGENDA --- */}
+        <aside className="sidebar-right">
+          <div className="agenda-card">
+            <h4>Upcoming Agenda 🗓</h4>
+            <div className="agenda-list">
+              <div className="agenda-item-modern">
+                <div className="agenda-time">14:00</div>
+                <div className="agenda-content">
+                  <h5>DSA Recursion</h5>
+                  <p>Starting in 20m</p>
+                </div>
+              </div>
+              <div className="agenda-item-modern">
+                <div className="agenda-time">18:30</div>
+                <div className="agenda-content">
+                  <h5>React UI Review</h5>
+                  <p>Tomorrow</p>
+                </div>
+              </div>
+            </div>
           </div>
 
-          <div className="activity-box">
-            <h4>Activity History</h4>
-            <div className="activity-item">✔ Joined OS Session</div>
-            <div className="activity-item">✔ Posted DSA Request</div>
+          <div className="activity-card-modern">
+            <h4>History</h4>
+            <ul className="history-list">
+              <li>Completed OS Prep</li>
+              <li>Joined WebDev Group</li>
+              <li>Earned "Helper" Badge</li>
+            </ul>
           </div>
         </aside>
+
       </div>
     </div>
   );
