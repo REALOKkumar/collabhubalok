@@ -43,3 +43,14 @@ app.use(cors()); // <--- Enable CORS for all routes
 app.use(express.json());
 
 // ... rest of your routes ...
+
+// ... (Previous imports)
+const interactionsRoute = require('./routes/interactions');
+
+// ... (Middleware)
+
+// Use the routes
+app.use('/api/interactions', interactionsRoute); 
+// Now you can fetch: 
+// http://localhost:5000/api/interactions/messages
+// http://localhost:5000/api/interactions/join-request

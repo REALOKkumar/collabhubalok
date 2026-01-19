@@ -1,57 +1,69 @@
-
-
-
-
 import React from "react";
-import { Routes, Route, useLocation } from "react-router-dom";
+import { Routes, Route, useLocation, Navigate } from "react-router-dom";
+
+// Components
 import AuthForm from "./components/AuthForm";
 import Dashboard from "./components/Dashboard";
+import CreatePost from './components/CreatePost'; // Your local component
 import PrivateRoute from "./components/PrivateRoute";
-import Navbar from "./components/Navbar"; // Navbar import karein
 import Home from "./components/Home";
 import Profile from "./components/Profile";
-import CreateRequest from "./components/CreateRequest";
-import "./App.css";
+import Navbar from "./components/Navbar"; // Added from remote
+
+import './App.css';
 
 function App() {
   const location = useLocation();
 
   return (
-    <div className="App">
-      {/* Agar path "/" (Login page) nahi hai, tabhi Navbar dikhao */}
+    <div className="app-main">
+      {/* Show Navbar on all pages EXCEPT Login ("/") */}
       {location.pathname !== "/" && <Navbar />}
 
       <Routes>
+        {/* 1. Public Route: Login/Signup */}
         <Route path="/" element={<AuthForm />} />
 
-        <Route
-          path="/Dashboard"
+        {/* 2. Protected Routes */}
+        <Route 
+          path="/home" 
+          element={
+            <PrivateRoute>
+              <Home />
+            </PrivateRoute>
+          } 
+        />
+        
+        <Route 
+          path="/dashboard" 
           element={
             <PrivateRoute>
               <Dashboard />
             </PrivateRoute>
-          }
+          } 
         />
 
-        {/* Inhe bhi PrivateRoute ke andar rakhna achha rahega */}
+        {/* Your 'Create' Route */}
         <Route 
-          path="/Home" 
+          path="/create" 
           element={
-            <PrivateRoute><Home /></PrivateRoute>
+            <PrivateRoute>
+              <CreatePost />
+            </PrivateRoute>
           } 
         />
+
         <Route 
-          path="/Profile" 
+          path="/profile" 
           element={
-            <PrivateRoute><Profile /></PrivateRoute>
+            <PrivateRoute>
+              <Profile />
+            </PrivateRoute>
           } 
         />
-        <Route 
-          path="/CreateRequest" 
-          element={
-            <PrivateRoute><CreateRequest /></PrivateRoute>
-          } 
-        />
+
+        {/* Catch-all: Redirect unknown URLs to Home */}
+        <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </div>
   );
