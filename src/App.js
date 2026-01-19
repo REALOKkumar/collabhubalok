@@ -1,11 +1,10 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { Routes, Route } from "react-router-dom";
+
 import AuthForm from "./components/AuthForm";
 import Dashboard from "./components/Dashboard";
 import CreatePost from './components/CreatePost';
 import PrivateRoute from "./components/PrivateRoute";
-import "./App.css";
 import Home from "./components/Home";
 import Profile from "./components/Profile";
 import CreateRequest from "./components/CreateRequest";
