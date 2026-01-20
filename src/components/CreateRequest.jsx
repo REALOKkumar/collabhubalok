@@ -1,5 +1,3 @@
-
-
 import React, { useState } from "react";
 import { db, auth } from "../firebase"; // Firebase connection
 import { collection, addDoc, serverTimestamp } from "firebase/firestore"; // Firestore methods
