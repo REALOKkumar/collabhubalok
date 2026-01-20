@@ -1,14 +1,19 @@
-import React, { useState, useEffect } from "react";
-import JoinButton from './JoinButton'; // <--- We keep this!
+import React, { useEffect, useState, useMemo } from "react";
+import { db, auth } from "../firebase";
+import { collection, query, orderBy, onSnapshot, addDoc, serverTimestamp } from "firebase/firestore";
 import "./Home.css";
 
 function Home() {
-  // --- STATE ---
   const [posts, setPosts] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState(""); // Fixed: Was declared twice before
+  
+  const [userData, setUserData] = useState({
+    streak: 5,
+    badges: ["Fast Learner", "Top Helper"],
+    interests: ["React", "AI", "Python", "UI/UX"]
+  });
 
-  // --- FETCH FROM YOUR BACKEND ---
   useEffect(() => {
     const q = query(collection(db, "posts"), orderBy("timestamp", "desc"));
     const unsubscribe = onSnapshot(q, (snapshot) => {
@@ -23,23 +28,62 @@ function Home() {
     return () => unsubscribe();
   }, []);
 
-  // --- FILTER LOGIC ---
-  const filteredPosts = posts.filter((post) => {
-    // We check both 'title' (your backend) and 'subject' (teammate's potential name) to be safe
-    const title = post.title || post.subject || "";
-    const desc = post.description || post.content || "";
-    return (
-      title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      desc.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  });
+  const matchedPosts = useMemo(() => {
+    return posts.filter(post => 
+      userData.interests.some(interest => 
+        post.subject?.toLowerCase().includes(interest.toLowerCase()) ||
+        post.topic?.toLowerCase().includes(interest.toLowerCase())
+      )
+    ).slice(0, 3);
+  }, [posts, userData.interests]);
 
-  // --- HELPER ---
-  const formatDate = (dateString) => {
-    if (!dateString) return "";
-    return new Date(dateString).toLocaleDateString("en-US", {
-      month: "short", day: "numeric", hour: "2-digit", minute: "2-digit"
-    });
+  const handleJoinSession = async (postId, posterName) => {
+    const user = auth.currentUser;
+    if (!user) {
+      alert("Please login to join!");
+      return;
+    }
+    try {
+      await addDoc(collection(db, "notifications"), {
+        postId: postId,
+        senderId: user.uid,
+        senderName: user.displayName || user.email.split('@')[0],
+        receiverName: posterName,
+        status: "pending",
+        timestamp: serverTimestamp(),
+        type: "session_request"
+      });
+      alert(`Request sent to ${posterName}!`);
+    } catch (error) {
+      console.error("Error joining:", error);
+    }
+  };
+
+  // Logic for Group Joining
+  const handleJoinGroup = async (groupName) => {
+    const user = auth.currentUser;
+    if (!user) {
+      alert("Please login to join groups!");
+      return;
+    }
+    try {
+      await addDoc(collection(db, "notifications"), {
+        senderId: user.uid,
+        senderName: user.displayName || user.email.split('@')[0],
+        groupName: groupName,
+        status: "pending",
+        timestamp: serverTimestamp(),
+        type: "group_request"
+      });
+      alert(`Join request sent for ${groupName}!`);
+    } catch (error) {
+      console.error("Error joining group:", error);
+    }
+  };
+
+  const addToCalendar = (event) => {
+    const gCalUrl = `https://www.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(event.title)}&dates=20260215T100000Z/20260215T120000Z`;
+    window.open(gCalUrl, '_blank');
   };
 
   return (
@@ -82,45 +126,131 @@ function Home() {
               </div>
             ))}
           </div>
+        </section>
 
-          {/* LOADING & ERROR STATES */}
-          {loading && <p style={{textAlign: 'center'}}>Loading study requests...</p>}
-          
-          {!loading && filteredPosts.length === 0 && (
-            <p style={{textAlign: 'center', color: '#666'}}>No study requests found.</p>
-          )}
-
-          {/* POSTS LIST */}
-          <div className="cards">
-            {!loading && filteredPosts.map((post) => (
-              <div className="card" key={post._id}>
-                {/* Fallback to 'General' if no tag provided */}
-                <span className="tag">{post.category || "General"}</span>
-
-                {/* Display Title (Backend: title, Teammate: subject) */}
-                <h3>
-                  {post.title || post.subject} 
-                  {post.topic && ` - ${post.topic}`}
-                </h3>
-
-                {/* Display Description */}
-                <p>{post.description || post.content}</p>
-
-                <div className="card-footer">
-                  <span>⏰ {formatDate(post.createdAt)}</span>
-                  {/* Handle User Name (Populated object vs string) */}
-                  <span>👤 {post.user?.name || post.name || "Anonymous"}</span>
-                </div>
-
-                {/* CRITICAL: Use your Backend Recorder Button */}
-                <JoinButton postId={post._id} />
-                
+        {/* NEW: POPULAR GROUPS SECTION (Horizontal Scroll) */}
+        <section className="section-container">
+          <div className="section-header">
+            <h2>Explore Communities</h2>
+            <span className="arrow-icon">➔</span>
+          </div>
+          <div className="hackathon-row">
+            {[
+              { id: 1, name: "React Experts", members: 120, category: "Web Dev" },
+              { id: 2, name: "Python Pioneers", members: 85, category: "Data Science" },
+              { id: 3, name: "AI Enthusiasts", members: 210, category: "Machine Learning" },
+              { id: 4, name: "UI/UX Designers", members: 60, category: "Design" },
+              { id: 5, name: "Competitive Coders", members: 340, category: "DSA" }
+            ].map((group) => (
+              <div className="hackathon-card group-card" key={group.id}>
+                <div className="event-tag group-tag">{group.category}</div>
+                <h4>{group.name}</h4>
+                <p>👤 {group.members} Members</p>
+                <button 
+                  className="btn-primary-home" 
+                  style={{ marginTop: '15px' }}
+                  onClick={() => handleJoinGroup(group.name)}
+                >
+                  Request to Join
+                </button>
               </div>
             ))}
           </div>
-        </main>
-      </div>
-    </>
+        </section>
+
+        {/* FRIENDS WITH SAME INTERESTS */}
+        <section className="interests-section">
+          <h2>Friends with same Interests</h2>
+          <div className="friends-grid">
+            <div className="profile-match-card">
+              <div className="avatar-placeholder"></div>
+              <p>Alex Rivera</p>
+              <div className="badge-list">
+                {userData.badges.map(b => <span key={b} className="mini-badge">🏆</span>)}
+              </div>
+              <span>Expert in React</span>
+            </div>
+          </div>
+        </section>
+
+        {/* BOTTOM TWO-COLUMN GRID */}
+        <div className="bottom-layout-grid">
+          <div className="progress-card">
+            <h3>Daily Progress</h3>
+            <div className="streak-visual">
+              <span className="streak-number">{userData.streak}</span>
+              <p>Days Knowledge Streak</p>
+            </div>
+            <div className="badge-shelf">
+              {userData.badges.map(badge => (
+                <span key={badge} className="skill-badge">🏆 {badge}</span>
+              ))}
+            </div>
+          </div>
+
+          <div className="groups-section">
+            <h3>Quick Stats</h3>
+            <div className="groups-list">
+              <div className="group-item-card">
+                <span>Total Connections</span>
+                <strong>42</strong>
+              </div>
+              <div className="group-item-card">
+                <span>Sessions Attended</span>
+                <strong>18</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <hr className="divider" />
+        <h1 className="page-title">Available Study Requests</h1>
+        
+        <div className="search-container">
+          <input
+            className="search-box"
+            type="text"
+            placeholder="🔍 Search by subject, topic, or content..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+
+        <div className="card-grid">
+          {loading ? (
+            <p>Loading sessions...</p>
+          ) : posts.length > 0 ? (
+            posts.filter(post => 
+              post.subject?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+              post.topic?.toLowerCase().includes(searchTerm.toLowerCase())
+            ).map((post) => (
+              <div className="card" key={post.id}>
+                <div className="card-header">
+                  <span className="tag">{post.category || post.subject}</span>
+                  {post.isVerified && <span className="verified-badge">✅ Verified Expert</span>}
+                </div>
+                <h3>{post.subject}: {post.topic}</h3>
+                <p>{post.content}</p>
+
+                <div className="card-footer">
+                  <div className="footer-item">👤 {post.name || "Student"}</div>
+                  <div className="footer-item">⏰ {post.timestamp?.toDate().toLocaleDateString()}</div>
+                </div>
+
+                <button 
+                  className="btn-primary-home" 
+                  onClick={() => handleJoinSession(post.id, post.name)}
+                >
+                  Join Study Session
+                </button>
+              </div>
+            ))
+          ) : (
+            <p className="no-results">No requests found.</p>
+          )}
+        </div>
+      </main>
+    </div>
   );
 }
 
