@@ -1,12 +1,12 @@
 import React, { useState } from "react";
+import { db, auth } from "../firebase"; // Firebase connection
+import { collection, addDoc, serverTimestamp } from "firebase/firestore"; // Firestore methods
 import { useNavigate } from "react-router-dom";
 import "./CreateRequest.css";
 
-
-
-
 const CreateRequest = () => {
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
 
   const [formData, setFormData] = useState({
     subject: "",
@@ -18,11 +18,37 @@ const CreateRequest = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log(formData); // backend later
-    alert("Request Created!");
-    navigate("/"); // home page
+    setLoading(true);
+
+    // Check if user is logged in
+    const user = auth.currentUser;
+    if (!user) {
+      alert("Session expired. Please login again.");
+      navigate("/");
+      return;
+    }
+
+    try {
+      // DATABASE ME SAVE KARNA
+      await addDoc(collection(db, "posts"), {
+        uid: user.uid,
+        name: user.displayName || user.email.split('@')[0],
+        subject: formData.subject,
+        topic: formData.title, // 'title' ko 'topic' ki tarah save kar rahe hain
+        content: formData.description,
+        timestamp: serverTimestamp(),
+      });
+
+      alert("Request Created Successfully!");
+      navigate("/Dashboard"); // Dashboard par bhejein, "/" par nahi
+    } catch (error) {
+      console.error("Error saving data:", error);
+      alert("Error: Data save nahi hua. Firestore Rules check karein!");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -34,7 +60,6 @@ const CreateRequest = () => {
 
       <div className="create-card">
         <form onSubmit={handleSubmit}>
-          {/* Subject */}
           <div className="form-group">
             <label>Subject</label>
             <select
@@ -53,7 +78,6 @@ const CreateRequest = () => {
             </select>
           </div>
 
-          {/* Title */}
           <div className="form-group">
             <label>Request Title</label>
             <input
@@ -66,28 +90,26 @@ const CreateRequest = () => {
             />
           </div>
 
-          {/* Description */}
           <div className="form-group">
             <label>Description</label>
             <textarea
               name="description"
-              placeholder="Describe what you want to study and goals..."
               rows="4"
+              placeholder="Describe what you want to study and goals..."
               value={formData.description}
               onChange={handleChange}
               required
             />
           </div>
 
-          {/* Buttons */}
           <div className="form-actions">
-            <button type="submit" className="btn-primary">
-              Create Request
+            <button type="submit" className="btn-primary" disabled={loading}>
+              {loading ? "Creating..." : "Create Request"}
             </button>
             <button
               type="button"
               className="btn-secondary"
-              onClick={() => navigate("/")}
+              onClick={() => navigate("/Dashboard")}
             >
               Cancel
             </button>

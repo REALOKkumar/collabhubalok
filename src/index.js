@@ -1,18 +1,21 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
+import { BrowserRouter } from 'react-router-dom';
 import './index.css';
 import App from './App';
-import reportWebVitals from './reportWebVitals';
-import { BrowserRouter } from 'react-router-dom'; // ✅ Import BrowserRouter
 
-const root = ReactDOM.createRoot(document.getElementById('root'));
+// This line looks for <div id="root"> in the file above
+const rootElement = document.getElementById('root'); 
+
+if (!rootElement) {
+    throw new Error("Failed to find the root element");
+}
+
+const root = ReactDOM.createRoot(rootElement);
 root.render(
   <React.StrictMode>
-    <BrowserRouter> {/* ✅ Wrap App in BrowserRouter */}
+    <BrowserRouter>
       <App />
     </BrowserRouter>
   </React.StrictMode>
 );
-
-// Performance measuring (optional)
-reportWebVitals();

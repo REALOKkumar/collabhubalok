@@ -5,24 +5,38 @@
   padding: 0;
   font-family: "Segoe UI", sans-serif;
 }
+.logo{
+  
+  margin-left: 50px;
+}
 
 /* Page center */
 body {
   min-height: 100vh;
-  background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+  backdrop-filter: blur(5px);
   display: flex;
   align-items: center;
   justify-content: center;
 }
+.margin{
+  width: 50%;
+  margin-left: 25%;
+}
+.oauth-buttons{
+  display: flex;
+  align-items: center;
+}
 
 /* Auth Card */
 .container {
-  width: 360px;
-  background: #ffffff;
+  margin-top:10%;
+  width: 100%;
   padding: 32px;
-  border-radius: 14px;
-  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.25);
+  border: 3px solid rgb(255, 255, 255);
+  border-radius: 25px;
+  box-shadow: 0px 0px 20px rgba(0, 0, 0, 50);
   animation: fadeIn 0.6s ease-in-out;
+  
 }
 
 /* Fade animation */
@@ -55,16 +69,16 @@ body {
 }
 
 .tab:hover {
-  color: #007bff;
+  color: #0b0b1d;
 }
 
 .tab.active {
-  color: #007bff;
-  border-bottom: 3px solid #007bff;
+  color: #0b0b1d;
+  border-bottom: 3px solid #0b0b1d;
 }
 
 /* Forms */
-.form-container {
+.form-container {             
   display: flex;
   flex-direction: column;
   animation: fadeIn 0.4s ease;
@@ -72,6 +86,7 @@ body {
 
 .form-container input {
   margin-bottom: 14px;
+  /* margin: 0 auto; */
   padding: 12px 14px;
   border: 1px solid #ccc;
   border-radius: 8px;
@@ -81,17 +96,20 @@ body {
 }
 
 .form-container input:focus {
-  border-color: #007bff;
+  border-color: #0b0b1d;
   box-shadow: 0 0 6px rgba(0, 123, 255, 0.35);
+  
 }
 
 /* Button */
 .form-container button {
   padding: 12px;
-  margin-top: 8px;
+  margin: 10px;
   border: none;
-  background: #007bff;
+  background: #0b0b1d;
   color: white;
+  align-items: center;
+  
   font-weight: bold;
   border-radius: 8px;
   cursor: pointer;
@@ -99,7 +117,7 @@ body {
 }
 
 .form-container button:hover {
-  background: #0056b3;
+  background: #0b0b1d;
 }
 
 /* Error & success messages */
@@ -107,4 +125,56 @@ p {
   margin-top: 14px;
   font-size: 14px;
   text-align: center;
+}
+/* Validation messages */
+.error-text {
+  color: #e63946;
+  font-size: 12px;
+  margin-top: -8px;
+  margin-bottom: 10px;
+  text-align: left;
+}
+
+/* Password strength */
+.strength {
+  font-size: 12px;
+  margin-top: -8px;
+  margin-bottom: 10px;
+  text-align: left;
+  font-weight: 600;
+}
+
+.strength.weak {
+  color: #e63946;
+}
+
+.strength.medium {
+  color: #f4a261;
+}
+
+.strength.strong {
+  color: #2a9d8f;
+}
+
+/* Disabled signup button */
+.form-container button:disabled {
+  background: #9bbbd4;
+  cursor: not-allowed;
+}
+.error {
+  color: #e63946;
+  font-size: 14px;
+  margin-top: 14px;
+  text-align: center;
+}
+.forgot {
+  color: #007bff;
+  font-size: 13px;
+  margin-top: 10px;
+  cursor: pointer;
+  text-align: center;
+}
+
+.forgot:hover {
+  text-decoration: underline;
 }
