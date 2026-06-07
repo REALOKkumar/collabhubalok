@@ -1,5 +1,5 @@
 import { Navigate } from "react-router-dom";
-import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { getAuth, onAuthStateChanged } from "../api";
 import { useEffect, useState } from "react";
 
 export default function PrivateRoute({ children }) {

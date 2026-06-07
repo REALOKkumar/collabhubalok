@@ -22,7 +22,7 @@ Collab-Hub offers a centralized system where students can create study or collab
 
 | Members        | Primary Responsibility           | Key Tasks |
 |---------------|----------------------------------|----------|
-| **Sandipan Ray** | The Architect (Auth & Setup) | • Set up GitHub Repo & Firebase Project<br>• Build Login & Signup Pages<br>• Handle Google/Email Authentication logic |
+| **Sandipan Ray** | The Architect (Auth & Setup) | • Set up GitHub Repo & Backend Project<br>• Build Login & Signup Pages<br>• Handle Google/Email Authentication logic |
 | **Alok Kumar** | The Builder (Dashboard) | • Create the Main Layout (Navbar, Sidebar)<br>• Build the "Feed" component that lists all study requests<br>• Design the "Card" component (how a request looks) |
 | **Harshit Raj** | The Creator (Forms & Actions) | • Build the "Create Post" Modal/Page<br>• Handle the logic to send data to the database<br>• Build the "Join" button logic (updating the DB when clicked) |
 | **Roshan Oraon** | The Polisher (Profile & Search) | • Build the User Profile Page (Display Name, Skills)<br>• Build the Search Bar & Filter logic (e.g., filter by "React" or "Math")<br>• Global CSS/Styling (fonts, colors, UI consistency) |
